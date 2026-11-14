@@ -1,0 +1,543 @@
+/* All styling for the Animator app. The .gleam files only attach class names. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+/* ── Layout: two columns ─────────────────────────────────────────────────── */
+
+.app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background: #1a1a2e;
+  color: #d4c5a0;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* Left column: the code editor. */
+.code-col {
+  width: 42%;
+  min-width: 320px;
+  max-width: 720px;
+  flex-shrink: 0;
+  display: flex;
+  border-right: 1px solid #3a3a5e;
+  background: #0f0f1e;
+}
+
+/* The code column stays in the DOM when collapsed, so CodeMirror keeps its
+   state; hiding it gives the right column the full width. */
+.app.code-hidden .code-col { display: none; }
+
+/* A small emoji button (the code pane's collapse toggle, and the playback
+   controls once they exist). */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a4a;
+  color: #d4c5a0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 5px 8px;
+}
+.icon-btn:hover { background: #3a3a5e; }
+
+/* ── Code panel (left column) ───────────────────────────────────────────── */
+
+.code-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #1a1a3e;
+  border-bottom: 1px solid #3a3a5e;
+}
+.code-title {
+  color: #e8d8b0;
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+/* Wrapper holding the editor. */
+.code-editor-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
+/* CodeMirror mount node: grows to fill the panel. */
+.code-editor {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  background: #0d0d1a;
+}
+.code-editor .cm-editor { width: 100%; height: 100%; }
+
+/* Collapsible reference of the built-ins available to draw functions. */
+.reference {
+  margin: 8px 14px 0;
+  border: 1px solid #3a3a5e;
+  border-radius: 4px;
+  background: #0d0d1a;
+  overflow: hidden;
+}
+.reference-summary {
+  padding: 6px 12px;
+  cursor: pointer;
+  color: #b8a888;
+  font-family: monospace;
+  font-size: 12px;
+  user-select: none;
+}
+.reference-summary:hover { color: #e8d8b0; }
+.reference-body {
+  padding: 4px 12px 10px;
+  border-top: 1px solid #3a3a5e;
+}
+.reference-group { margin-top: 8px; }
+.reference-group-title {
+  color: #8a8aca;
+  font-family: monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.reference-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 1px 0;
+}
+.reference-sig {
+  color: #89ddff;
+  font-family: monospace;
+  font-size: 12px;
+  white-space: pre;
+}
+.reference-desc { color: #6a7a8a; font-size: 11px; }
+
+/* ── Animation area (right column) ──────────────────────────────────────── */
+
+.canvas-area {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a14;
+  container-type: size;
+}
+
+/* The interpreter's List(Path) (or its error), shown as text before the
+   animation pane is built. */
+.output {
+  align-self: stretch;
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #cfe3ff;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+/* Leave room for the reveal button, which only overlays this pane while the
+   code column is hidden. */
+.app.code-hidden .output { padding-top: 48px; }
+
+/* Button that reveals the code column again when it is hidden. */
+.reveal-code {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+}
+
+/* A centred square that fits the (possibly non-square) animation area. Give your
+   <canvas> this class, so that drawings aren't stretched. */
+.canvas {
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+}
+
+/* Code to make the user's code output/error box overlay over the model instead of being squished */
+.canvas { position: absolute; inset: 0; margin: auto; z-index: 0; }
+
+.output {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1;
+  max-height: 30%;
+  padding: 10px;
+  overflow: auto;
+  background: rgb(10 10 20 / 85%);
+  border: 1px solid #3a3a5e;
+  border-radius: 4px;
+}
+
+/* Code to make the restart animation button fit the rest of the app */
+.restart-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 32px;
+  height: 28px;
+  padding: 0;
+}
+
+.pause-btn {
+  position: absolute;
+  top: 12px;
+  right: 52px;
+  z-index: 2;
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  gap: 4px;
+}
+
+.pause-bar {
+  width: 2px;
+  height: 12px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.controls-stack {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: min(260px, calc(100% - 112px));
+}
+
+.animation-controls {
+  position: relative;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #3a3a5e;
+  border-radius: 4px;
+  background: rgb(10 10 20 / 85%);
+}
+
+.app.code-hidden .controls-stack { left: 56px; }
+
+.slider-control {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  color: #b8a888;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.slider-control input[type="range"] {
+  width: 100%;
+  accent-color: #8a8aca;
+}
+
+.drawing-select {
+  width: 100%;
+  min-width: 0;
+  padding: 3px 4px;
+  border: 1px solid #4a4a8a;
+  border-radius: 3px;
+  background: #1a1a3e;
+  color: #d4c5a0;
+  font: inherit;
+}
+
+.memory-mode .code-col {
+  filter: blur(5px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.memory-mode .canvas {
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.memory-mode-btn,
+.memory-action-btn {
+  padding: 8px 12px;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  background: #2a2a4a;
+  color: #e8d8b0;
+  cursor: pointer;
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.memory-mode-btn:hover,
+.memory-action-btn:hover {
+  background: #3a3a5e;
+}
+
+.memory-mode-btn {
+  align-self: flex-start;
+  width: 100px;
+  height: 28px;
+  padding: 0 4px;
+  font-size: 11px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.memory-instructions {
+  position: absolute;
+  inset: 64px 32px 32px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  color: #e8d8b0;
+  font-size: clamp(16px, 2vw, 22px);
+  text-align: center;
+}
+
+.memory-instructions p {
+  max-width: 620px;
+  line-height: 1.5;
+}
+
+.memory-action-btn {
+  margin-top: 8px;
+}
+
+.memory-finish-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  margin: 0;
+}
+
+.memory-entry {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 10px);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.memory-best-accuracy {
+  color: #b8a888;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.memory-thickness-control {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid #3a3a5e;
+  border-radius: 4px;
+  background: rgb(10 10 20 / 88%);
+  color: #b8a888;
+  font-family: monospace;
+  font-size: 12px;
+  transform: translateX(-50%);
+}
+
+.memory-thickness-control input[type="range"] {
+  width: min(220px, 42vw);
+  accent-color: #8a8aca;
+}
+
+.memory-undo-btn {
+  position: static;
+  flex: 0 0 auto;
+  height: 28px;
+  padding: 0 7px;
+  font-size: 12px;
+}
+
+@container (max-width: 520px) {
+  .controls-stack {
+    width: 220px;
+  }
+
+  .slider-control {
+    grid-template-columns: 90px minmax(0, 1fr);
+  }
+
+  .slider-control label {
+    white-space: nowrap;
+  }
+
+  .memory-entry {
+    left: calc(100% + 8px);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    width: 120px;
+    white-space: normal;
+  }
+}
+
+@container (max-width: 360px) {
+  .memory-entry {
+    top: 158px;
+    left: 12px;
+  }
+}
+
+.memory-results {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  background: rgb(10 10 20 / 72%);
+  color: #e8d8b0;
+  text-align: center;
+}
+
+.score-celebration {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.memory-results > :not(.score-celebration) {
+  position: relative;
+  z-index: 1;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -18px;
+  left: 3%;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  background: #f2c14e;
+  animation: confetti-fall 3.8s linear infinite;
+}
+
+.confetti-piece:nth-child(4n + 2) { background: #ef6f6c; }
+.confetti-piece:nth-child(4n + 3) { background: #6ec6a8; }
+.confetti-piece:nth-child(4n) { background: #8a8aca; }
+.confetti-piece:nth-child(2) { left: 11%; animation-delay: -1.2s; }
+.confetti-piece:nth-child(3) { left: 18%; animation-delay: -2.7s; }
+.confetti-piece:nth-child(4) { left: 25%; animation-delay: -0.5s; }
+.confetti-piece:nth-child(5) { left: 32%; animation-delay: -2s; }
+.confetti-piece:nth-child(6) { left: 39%; animation-delay: -3.1s; }
+.confetti-piece:nth-child(7) { left: 46%; animation-delay: -1.6s; }
+.confetti-piece:nth-child(8) { left: 53%; animation-delay: -2.4s; }
+.confetti-piece:nth-child(9) { left: 60%; animation-delay: -0.9s; }
+.confetti-piece:nth-child(10) { left: 67%; animation-delay: -3.4s; }
+.confetti-piece:nth-child(11) { left: 74%; animation-delay: -1.9s; }
+.confetti-piece:nth-child(12) { left: 81%; animation-delay: -0.3s; }
+.confetti-piece:nth-child(13) { left: 88%; animation-delay: -2.8s; }
+.confetti-piece:nth-child(14) { left: 95%; animation-delay: -1.4s; }
+.confetti-piece:nth-child(15) { left: 7%; animation-delay: -3.6s; }
+.confetti-piece:nth-child(16) { left: 91%; animation-delay: -2.2s; }
+
+.confetti-piece:nth-child(3n) { animation-duration: 3.2s; }
+.confetti-piece:nth-child(3n + 1) { animation-duration: 4.4s; }
+
+.sad-face {
+  position: absolute;
+  top: 16%;
+  left: 12%;
+  font-size: clamp(24px, 4vw, 42px);
+  opacity: 0.72;
+  animation: sad-face-float 3s ease-in-out infinite;
+}
+
+.sad-face:nth-child(2) { top: 24%; left: 78%; animation-delay: -1.1s; }
+.sad-face:nth-child(3) { top: 70%; left: 18%; animation-delay: -2s; }
+.sad-face:nth-child(4) { top: 72%; left: 82%; animation-delay: -0.6s; }
+.sad-face:nth-child(5) { top: 10%; left: 48%; animation-delay: -1.7s; }
+
+@keyframes confetti-fall {
+  to { transform: translateY(110vh) rotate(620deg); }
+}
+
+@keyframes sad-face-float {
+  50% { transform: translateY(12px) rotate(-8deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti-piece,
+  .sad-face {
+    animation: none;
+  }
+}
+
+.memory-score-value,
+.memory-score-message {
+  font-family: 'Georgia', serif;
+  font-size: clamp(24px, 4vw, 40px);
+  letter-spacing: 1px;
+}
+
+.memory-score-message {
+  font-size: clamp(20px, 3vw, 30px);
+}
+
+.memory-results .memory-action-btn {
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  padding: 9px 16px;
+}
+
+.memory-board {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+  margin: auto;
+  border: 1px solid #3a3a5e;
+  background: transparent;
+  touch-action: none;
+}
